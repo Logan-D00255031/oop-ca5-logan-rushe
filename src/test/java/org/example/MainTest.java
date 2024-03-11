@@ -1,5 +1,7 @@
 package org.example;
 
+import org.example.Logan.Car;
+import org.example.Logan.MySqlCarDao;
 import org.junit.Test;
 import java.sql.SQLException;
 import static org.junit.Assert.*;

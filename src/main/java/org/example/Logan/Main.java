@@ -1,4 +1,4 @@
-package org.example;
+package org.example.Logan;
 
 import java.sql.SQLException;
 
