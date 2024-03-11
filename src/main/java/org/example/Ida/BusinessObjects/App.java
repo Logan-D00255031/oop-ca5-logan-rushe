@@ -4,6 +4,9 @@ import org.example.Ida.DAOs.MySqlCarDao;
 import org.example.Ida.DAOs.MySqlDao;
 import org.example.Ida.DTOs.CarClass;
 import org.example.Ida.Exceptions.DaoException;
+import org.example.Logan.Car;
+
+import java.sql.SQLException;
 import java.util.List;
 
 
@@ -22,8 +25,16 @@ public class App {
                     System.out.println(car.toString());
                 }
             }
+
+            System.out.println("\nCall insertCar()");
+            int code = IUserDao.insertCar(new CarClass(1, "Civic", "Honda", "Silver", 2010, 25000));
+            if(code == 1) {
+                System.out.println("Car added successfully");
+            } else if (code == 0) {
+                System.out.println("Car already exists in table");
+            }
         }
-        catch (DaoException e){
+        catch (SQLException e){
             e.printStackTrace();
         }
     }
