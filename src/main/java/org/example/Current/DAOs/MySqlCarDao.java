@@ -95,10 +95,13 @@ public class MySqlCarDao extends MySqlDao implements CarDaoInterface {
             preparedStatement.setInt(5, car.getPrice());
 
             // Prepare statement to check if the car is in the table already
-            String checkQuery = "SELECT * FROM car WHERE model = ? AND brand = ?";
+            String checkQuery = "SELECT * FROM car WHERE model = ? AND brand = ? AND colour = ? AND production_year = ? AND price = ?";
             checkStatement = connection.prepareStatement(checkQuery, Statement.RETURN_GENERATED_KEYS);
             checkStatement.setString(1, car.getModel());
             checkStatement.setString(2, car.getBrand());
+            checkStatement.setString(3, car.getColour());
+            checkStatement.setInt(4, car.getProductionYear());
+            checkStatement.setInt(5, car.getPrice());
             resultSet = checkStatement.executeQuery();
 
             // If the car is not found in the table
