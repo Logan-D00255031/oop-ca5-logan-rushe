@@ -4,6 +4,7 @@ import org.example.Current.DTOs.Car;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 
@@ -239,5 +240,36 @@ public class MySqlCarDao extends MySqlDao implements CarDaoInterface {
                 throw new SQLException("deleteCarById() " + e.getMessage());
             }
         }
+    }
+
+    //  **** Logan's Code ****
+    public List<Car> findCarsUsingFilter(Comparator<Car> carComparator) throws SQLException {
+        Connection connection = null;
+        PreparedStatement preparedStatement1 = null;
+        ResultSet resultSet = null;
+        List<Car> carsList = new ArrayList<>();
+
+        try {
+            carsList = findAllCars();
+            // Sorts the list of cars using the comparator
+            carsList.sort(carComparator);
+
+        } catch (SQLException e) {
+            throw new SQLException("findCarsUsingFilter() " + e.getMessage());
+        } finally {
+            try {
+                if (preparedStatement1 != null)
+                {
+                    preparedStatement1.close();
+                }
+                if (connection != null)
+                {
+                    freeConnection(connection);
+                }
+            } catch (SQLException e) {
+                throw new SQLException("deleteCarById() " + e.getMessage());
+            }
+        }
+        return carsList;
     }
 }

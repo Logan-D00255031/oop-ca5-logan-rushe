@@ -2,7 +2,7 @@ package org.example.Current.DTOs;
 
 import java.util.Objects;
 
-public class Car {
+public class Car implements Comparable<Car> {
     private int id;
     private String model;
     private String brand;
@@ -90,5 +90,13 @@ public class Car {
     @Override
     public int hashCode() {
         return Objects.hash(id, model, brand, colour, productionYear, price);
+    }
+
+    @Override
+    public int compareTo(Car other) {
+        if(this.brand.equals(other.brand))
+            return this.model.compareTo(other.model);
+        else
+            return this.brand.compareTo(other.brand);
     }
 }

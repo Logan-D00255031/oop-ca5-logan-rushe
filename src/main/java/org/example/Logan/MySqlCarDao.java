@@ -4,6 +4,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MySqlCarDao extends MySqlDao implements CarDaoInterface {
     // Logan Rushe
@@ -69,6 +71,127 @@ public class MySqlCarDao extends MySqlDao implements CarDaoInterface {
             }
         }
         return code;
+    }
+
+    public List<Car> findCarsUsingNaturalOrder() throws SQLException {
+        Connection connection = null;
+        PreparedStatement preparedStatement1 = null;
+        ResultSet resultSet = null;
+        List<Car> carsList = new ArrayList<>();
+
+        try {
+            carsList = findAllCars();
+            // Sorts the list of cars using the car's natual order
+            carsList.sort(null);
+
+        } catch (SQLException e) {
+            throw new SQLException("findCarsUsingFilter() " + e.getMessage());
+        } finally {
+            try {
+                if (preparedStatement1 != null)
+                {
+                    preparedStatement1.close();
+                }
+                if (connection != null)
+                {
+                    freeConnection(connection);
+                }
+            } catch (SQLException e) {
+                throw new SQLException("deleteCarById() " + e.getMessage());
+            }
+        }
+        return carsList;
+    }
+
+    @Override
+    public List<Car> findAllCars() throws SQLException
+    {
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+        List<Car> carsList = new ArrayList<>();
+        try
+        {
+            //Get connection object using the getConnection() method inherited
+            // from the super class (MySqlDao.java)
+            connection = this.getConnection();
+
+            String query = "SELECT * FROM car";
+            preparedStatement = connection.prepareStatement(query);
+
+            //Using a PreparedStatement to execute SQL...
+            resultSet = preparedStatement.executeQuery();
+            while (resultSet.next())
+            {
+                int id = resultSet.getInt("ID");
+                String model = resultSet.getString("MODEL");
+                String brand = resultSet.getString("BRAND");
+                String colour = resultSet.getString("COLOUR");
+                int production_year = resultSet.getInt("PRODUCTION_YEAR");
+                int price = resultSet.getInt("PRICE");
+
+
+                Car u = new Car(id,model,brand,colour,production_year,price);
+                carsList.add(u);
+            }
+        } catch (SQLException e)
+        {
+            throw new SQLException("findAllCarResultSet() " + e.getMessage());
+        } finally
+        {
+            try
+            {
+                if (resultSet != null)
+                {
+                    resultSet.close();
+                }
+                if (preparedStatement != null)
+                {
+                    preparedStatement.close();
+                }
+                if (connection != null)
+                {
+                    freeConnection(connection);
+                }
+            } catch (SQLException e)
+            {
+                throw new SQLException("findAllCars() " + e.getMessage());
+            }
+        }
+        return carsList;     // may be empty
+    }
+
+    public void resetCarTable() throws SQLException
+    {
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+
+        try {
+            //Get connection object using the getConnection() method inherited
+            // from the super class (MySqlDao.java)
+            connection = this.getConnection();
+
+            String query = "";
+            preparedStatement = connection.prepareStatement(query);
+
+            //Using a PreparedStatement to execute SQL...
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            throw new SQLException("resetCarTable() " + e.getMessage());
+        } finally {
+            try {
+                if (preparedStatement != null)
+                {
+                    preparedStatement.close();
+                }
+                if (connection != null)
+                {
+                    freeConnection(connection);
+                }
+            } catch (SQLException e) {
+                throw new SQLException("findAllCars() " + e.getMessage());
+            }
+        }
     }
 }
 
