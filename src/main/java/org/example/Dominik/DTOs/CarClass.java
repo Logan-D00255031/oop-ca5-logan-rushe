@@ -1,4 +1,4 @@
-package org.example.Ida.DTOs;
+package org.example.Dominik.DTOs;
 
 public class CarClass {
     private int id;
@@ -67,13 +67,13 @@ public class CarClass {
 
     @Override
     public String toString() {
-        return "main.DAOs.CarClass{" +
-                "id - " + id +
-                ", model - " + model +
-                ", brand - " + brand +
-                ", colour - " + colour +
-                ", production_year - " + production_year +
-                ", price - " + price +
+        return "CarClass{" +
+                "id=" + id +
+                ", model='" + model + '\'' +
+                ", brand='" + brand + '\'' +
+                ", colour='" + colour + '\'' +
+                ", production_year=" + production_year +
+                ", price=" + price +
                 '}';
     }
 }

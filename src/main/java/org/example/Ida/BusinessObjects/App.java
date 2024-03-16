@@ -4,47 +4,53 @@ import org.example.Ida.DAOs.MySqlCarDao;
 import org.example.Ida.DAOs.MySqlDao;
 import org.example.Ida.DTOs.CarClass;
 import org.example.Ida.Exceptions.DaoException;
-import org.example.Logan.Car;
-
-import java.sql.SQLException;
 import java.util.List;
-
 
 public class App {
     public static void main(String[] args) {
         CarDaoInterface IUserDao = new MySqlCarDao();
 
-        try{
+        try {
             System.out.println("\nCall findAllUser()");
-            List<CarClass> cars = IUserDao.findAllCars() ;
+            List<CarClass> cars = IUserDao.findAllCars();
 
-            if(cars.isEmpty()){
+            if (cars.isEmpty()) {
                 System.out.println("There are no cars");
-            }else{
-                for (CarClass car: cars){
+            } else {
+                for (CarClass car : cars) {
                     System.out.println(car.toString());
                 }
             }
-
-            System.out.println("\nCall insertCar()");
             int code = IUserDao.insertCar(new CarClass(1, "Civic", "Honda", "Silver", 2010, 25000));
             if(code == 1) {
-                System.out.println("Car added successfully");
+                System.out.println("\nCar added successfully");
             } else if (code == 0) {
-                System.out.println("Car already exists in table");
+                System.out.println("\nCar already exists in table");
+                }
+
+            System.out.println("\nCall deleteById() where id = 14");
+            IUserDao.deleteCarById(14);
+
+            System.out.println("\n Call: findCarById()");
+            CarClass car = IUserDao.findCarById(2);
+            if(car != null){ //null is returned if in is not valid
+                System.out.println("Car found: " + car);
+            } else {
+                System.out.println("Car with this id not found in database");
             }
-        }
-        catch (SQLException e){
+
+        } catch (DaoException e) {
             e.printStackTrace();
         }
     }
 }
 
+
 /* TODO ask dermot to help with the output cause why is there '
     Features 1 - Dominik - done
-    Feature 2 - Dominik
-    Feature 3 - Ida
-    Feature 4 - Logan
+    Feature 2 - Dominik - done
+    Feature 3 - Ida - done
+    Feature 4 - Logan - done
  */
 
 
@@ -60,35 +66,3 @@ public class App {
 
 
 
-
-
-
-
-
-
-
-//    public void start() {
-//
-//        System.out.println("\nSample 1 - Connecting to MySQL Database called \"test\" using MySQL JDBC Driver");
-//
-//        String url = "jdbc:mysql://localhost/";
-//        String dbName = "car_rental";
-//        String userName = "root";   // default
-//        String password = "";       // default
-//
-//        try ( Connection conn =
-//                      DriverManager.getConnection(url + dbName, userName, password) )
-//        {
-//            System.out.println("SUCCESS ! - Your program has successfully connected to the MySql Database Server. Well done.");
-//            System.out.println("... we could query the database using the SQL commands you learned in DBMS...");
-//            System.out.println("... but for now, we will simply close the connection.");
-//
-//            System.out.println("Your program is disconnecting from the database - goodbye.");
-//        }
-//        catch (SQLException ex)
-//        {
-//            System.out.println("Failed to connect to database - check that you have started the MySQL from XAMPP, and that your connection details are correct.");
-//            ex.printStackTrace();
-//        }
-//    }
-//}
