@@ -1,4 +1,4 @@
-package org.example.Current;
+package org.example.Current.DTOs;
 
 import java.util.Objects;
 

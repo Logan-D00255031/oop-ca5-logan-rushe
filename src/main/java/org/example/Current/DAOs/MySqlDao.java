@@ -1,4 +1,4 @@
-package org.example.Current;
+package org.example.Current.DAOs;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
