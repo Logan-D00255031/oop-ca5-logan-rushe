@@ -8,7 +8,9 @@ import java.util.List;
 public interface CarDaoInterface {
     List<Car> findAllCars() throws SQLException;
     void deleteCarById(int id) throws SQLException;
+
     /**
+     * Main Author: Logan Rushe
      * Insert a given Car into the car table
      * @param car The car object to be inserted
      * @return The inserted Car if successful, or the Car will be NULL if it's already contained within the table
@@ -18,10 +20,12 @@ public interface CarDaoInterface {
     Car findCarById(int id) throws SQLException;
 
     /**
+     * Main Author: Logan Rushe
      * Returns a sorted list of Cars from the database
      * @param carComparator The comparator used to sort the list
      * @return The sorted Car List
      * @throws SQLException if any SQL statements fail
      */
     List<Car> findCarsUsingFilter(Comparator<Car> carComparator) throws SQLException;
+    void updateCar(int id, Car car) throws SQLException;
 }

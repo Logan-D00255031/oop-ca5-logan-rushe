@@ -9,6 +9,9 @@ import java.util.List;
 
 
 public class MySqlCarDao extends MySqlDao implements CarDaoInterface {
+    /**
+     * Main Author: Dominik Domalip
+     */
     @Override
     public List<Car> findAllCars() throws SQLException
     {
@@ -67,9 +70,12 @@ public class MySqlCarDao extends MySqlDao implements CarDaoInterface {
         return carsList;     // may be empty
     }
 
+
     //  **** Logan's Code ****
     //  **** Fixed by Dominik as My code was returning an int instead of the Car entity inserted
     /**
+     * Main Author: Logan Rushe
+     * Other contributors: Dominik Domalip
      * Insert a given Car into the car table
      * @param car The car object to be inserted
      * @return The inserted Car if successful, or the Car will be NULL if it's already contained within the table
@@ -116,6 +122,7 @@ public class MySqlCarDao extends MySqlDao implements CarDaoInterface {
             }
             /* TODO
                 Try to return the car that was found from the database check and figure out how to tell it apart from the car being added successfully
+                Most likely will have to send the Car info through the function and still return NULL
              */
         } catch (SQLException e) {
             throw new SQLException("insertCar() " + e.getMessage());
@@ -144,6 +151,9 @@ public class MySqlCarDao extends MySqlDao implements CarDaoInterface {
         return newCar;
     }
 
+    /**
+     * Main Author: Dominik Domalip
+     */
     //    **** Dominik's code ****
     @Override
     public Car findCarById(int id) throws SQLException{
@@ -201,7 +211,13 @@ public class MySqlCarDao extends MySqlDao implements CarDaoInterface {
         return car;
     }
 
+    /**
+     * Main Author: Ida Tehlarova
+     * Other contributors: Dominik Domalip
+     */
     //    **** Ida's code
+    //    **** Dominik upgrade - return what car has been deleted by using function findCarById() to get the object before and then after
+    //    delete print out deleted car
     public void deleteCarById(int id) throws SQLException {
 
         //CarDaoInterface carDaoInterface = new MySqlCarDao();
@@ -242,6 +258,9 @@ public class MySqlCarDao extends MySqlDao implements CarDaoInterface {
         }
     }
 
+    /**
+     * Main Author: Logan Rushe
+     */
     //  **** Logan's Code ****
     public List<Car> findCarsUsingFilter(Comparator<Car> carComparator) throws SQLException {
         Connection connection = null;
@@ -271,5 +290,46 @@ public class MySqlCarDao extends MySqlDao implements CarDaoInterface {
             }
         }
         return carsList;
+    }
+
+    /**
+     * Main Author: Ida Tehlarova
+     * Other contributors: Logan Rushe
+     */
+    @Override
+    public void updateCar(int id, Car car) throws SQLException {
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+
+        try {
+            connection = this.getConnection();
+
+            // Prepare update statement
+            String query = "UPDATE car SET model =?, brand = ?, colour = ?, production_year = ?, price = ? WHERE id = ?;";
+            preparedStatement = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
+            preparedStatement.setString(1, car.getModel());
+            preparedStatement.setString(2, car.getBrand());
+            preparedStatement.setString(3, car.getColour());
+            preparedStatement.setInt(4, car.getProductionYear());
+            preparedStatement.setInt(5, car.getPrice());
+            preparedStatement.setInt(6, id);
+
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            throw new SQLException("updateCar() " + e.getMessage());
+        } finally {
+            try {
+                if (preparedStatement != null)
+                {
+                    preparedStatement.close();
+                }
+                if (connection != null)
+                {
+                    freeConnection(connection);
+                }
+            } catch (SQLException e) {
+                throw new SQLException("updateCar() " + e.getMessage());
+            }
+        }
     }
 }

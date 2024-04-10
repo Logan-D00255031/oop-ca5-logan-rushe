@@ -1,12 +1,19 @@
 package org.example.Dominik.DAOs;
 import org.example.Dominik.DTOs.CarClass;
 import org.example.Dominik.Exception.DaoException;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
+import java.security.PublicKey;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 public class MySqlCarDao extends MySqlDao implements CarDaoInterface{
+    /**
+     * Main Author: Dominik Domalip
+     */
     @Override
     public List<CarClass> findAllCars() throws DaoException {
         Connection connection = null;
@@ -51,9 +58,11 @@ public class MySqlCarDao extends MySqlDao implements CarDaoInterface{
         return carList;
     }
 
+    /**
+     * Main Author: Dominik Domalip
+     */
     //    Feature 2 – Find and Display (a single) Entity by Key
 //    e.g. getPlayerById(id ) – return a single entity (DTO) and display its contents.
-
 //    **** Dominik's code ****
     @Override
     public CarClass findCarById(int id) throws DaoException{
@@ -111,13 +120,18 @@ public class MySqlCarDao extends MySqlDao implements CarDaoInterface{
         return car;
     }
 
+
+    /**
+     * Main Author: Ida Tehlarova
+     * Other contributors: Dominik Domalip
+     */
 //    **** Ida's code
+//    **** Dominik upgrade - return what car has been deleted by using function findCarById() to get the object before and then after
+//    delete print out deleted car
     public void deleteCarById(int id) throws DaoException{
-
-        //CarDaoInterface carDaoInterface = new MySqlCarDao();
-
         Connection connection = null;
         PreparedStatement preparedStatement1 = null;
+        CarClass carClass = null;
 
         try
         {
@@ -127,8 +141,12 @@ public class MySqlCarDao extends MySqlDao implements CarDaoInterface{
             System.out.println("Building a PreparedStatement to delete a new row in database.");
 
             preparedStatement1.setInt(1, id);
-            preparedStatement1.executeUpdate();
 
+            CarClass carClass1 = findCarById(id);
+            carClass = carClass1;
+
+            preparedStatement1.executeUpdate();
+            System.out.println("--- Car deleted from database: ---\n" + carClass);
             System.out.println("Disconnected from database");
 
         } catch (SQLException e) {
@@ -152,6 +170,10 @@ public class MySqlCarDao extends MySqlDao implements CarDaoInterface{
         }
     }
 
+/**
+ * Main Author: Logan Rushe
+ * Other contributors: Dominik Domalip
+ */
 // **** Logan's code feature for inserting a new entity
 //    **** Fixed by Dominik as Logan's code was only returning int when new entity added instead of the entity itself
     @Override
@@ -218,5 +240,41 @@ public class MySqlCarDao extends MySqlDao implements CarDaoInterface{
         return newCar;
     }
 
+    /**
+     * Main Author: Logan Rushe
+     */
+//    **** Logan's code ****
+    public List<CarClass> findCarsUsingFilter(Comparator<CarClass> carComparator) throws SQLException {
+        Connection connection = null;
+        PreparedStatement preparedStatement1 = null;
+        ResultSet resultSet = null;
+        List<CarClass> carsList;
+
+        try {
+//          adding all of our entities into the list
+            carsList = findAllCars();
+            // Sorts the list of cars using the comparator
+            carsList.sort(carComparator);
+
+        } catch (DaoException e) {
+            throw new SQLException("findCarsUsingFilter() " + e.getMessage());
+        } finally {
+            try {
+                if (preparedStatement1 != null)
+                {
+                    preparedStatement1.close();
+                }
+                if (connection != null)
+                {
+                    freeConnection(connection);
+                }
+            } catch (SQLException e) {
+                throw new SQLException("deleteCarById() " + e.getMessage());
+            } catch (DaoException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return carsList;
+    }
 
 }

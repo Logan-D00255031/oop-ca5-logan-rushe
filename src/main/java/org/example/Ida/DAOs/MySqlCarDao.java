@@ -1,36 +1,33 @@
 package org.example.Ida.DAOs;
 import org.example.Ida.DTOs.CarClass;
-import org.example.Ida.Exceptions.DaoException;
+import org.example.Ida.Exception.DaoException;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.security.PublicKey;
+import java.sql.*;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
-
 public class MySqlCarDao extends MySqlDao implements CarDaoInterface{
+    /**
+     * Main Author: Dominik Domalip
+     */
     @Override
-    public List<CarClass> findAllCars() throws DaoException
-    {
+    public List<CarClass> findAllCars() throws DaoException {
         Connection connection = null;
         PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;
-        List<CarClass> carsList = new ArrayList<>();
-        try
-        {
-            //Get connection object using the getConnection() method inherited
-            // from the super class (MySqlDao.java)
-            connection = this.getConnection();
+        List<CarClass> carList = new ArrayList<>();
+        try {
+            connection =  this.getConnection();
 
             String query = "SELECT * FROM car";
             preparedStatement = connection.prepareStatement(query);
 
-            //Using a PreparedStatement to execute SQL...
             resultSet = preparedStatement.executeQuery();
-            while (resultSet.next())
-            {
+            while (resultSet.next()){
                 int id = resultSet.getInt("ID");
                 String model = resultSet.getString("MODEL");
                 String brand = resultSet.getString("BRAND");
@@ -38,136 +35,36 @@ public class MySqlCarDao extends MySqlDao implements CarDaoInterface{
                 int production_year = resultSet.getInt("PRODUCTION_YEAR");
                 int price = resultSet.getInt("PRICE");
 
-
-                CarClass u = new CarClass(id,model,brand,colour,production_year,price);
-                carsList.add(u);
+                CarClass u = new CarClass(id, model, brand, colour, production_year, price);
+                carList.add(u);
             }
-        } catch (SQLException e)
-        {
-            throw new DaoException("findAllCarResultSet() " + e.getMessage());
-        } finally
-        {
-            try
-            {
-                if (resultSet != null)
-                {
-                    resultSet.close();
-                }
-                if (preparedStatement != null)
-                {
-                    preparedStatement.close();
-                }
-                if (connection != null)
-                {
-                    freeConnection(connection);
-                }
-            } catch (SQLException e)
-            {
-                throw new DaoException("findAllCars() " + e.getMessage());
-            }
-        }
-        return carsList;     // may be empty
-    }
-    public void deleteCarById(int id) throws DaoException{
-
-        //CarDaoInterface carDaoInterface = new MySqlCarDao();
-
-        Connection connection = null;
-        PreparedStatement preparedStatement1 = null;
-
-        try
-        {
-            String query1 = "DELETE FROM car_rental.car WHERE id = ?";
-            connection = this.getConnection();
-            preparedStatement1 = connection.prepareStatement(query1);
-            System.out.println("Building a PreparedStatement to delete a new row in database.");
-
-            preparedStatement1.setInt(1, id);
-            preparedStatement1.executeUpdate();
-
-            System.out.println("Disconnected from database");
-
-        } catch (SQLException e) {
-            throw new DaoException("deleteCarById() " + e.getMessage());
-        }
-        finally
-        {
-            try
-            {
-                if (preparedStatement1 != null)
-                {
-                    preparedStatement1.close();
-                }
-                if (connection != null)
-                {
-                    freeConnection(connection);
-                }
-            } catch (SQLException e) {
-                throw new DaoException("deleteCarById() " + e.getMessage());
-            }
-        }
-    }
-    public int insertCar(CarClass car) throws DaoException {
-        Connection connection = null;
-        PreparedStatement preparedStatement = null;
-        PreparedStatement checkStatement = null;
-        ResultSet resultSet = null;
-        int code;
-
-        try {
-            connection = this.getConnection();
-
-            // Prepare insert statement
-            String query = "INSERT INTO car VALUES (null, ?, ?, ?, ?, ?)";
-            preparedStatement = connection.prepareStatement(query);
-            preparedStatement.setString(1, car.getModel());
-            preparedStatement.setString(2, car.getBrand());
-            preparedStatement.setString(3, car.getColour());
-            preparedStatement.setInt(4, car.getProduction_year());
-            preparedStatement.setInt(5, car.getPrice());
-
-            // Prepare statement to check if the car is in the table already
-            String checkQuery = "SELECT * FROM car WHERE model = ? AND brand = ?";
-            checkStatement = connection.prepareStatement(checkQuery);
-            checkStatement.setString(1, car.getModel());
-            checkStatement.setString(2, car.getBrand());
-            resultSet = checkStatement.executeQuery();
-
-            // If the car is found in the table
-            if(resultSet.next())
-                code = 0;
-            else
-                code = preparedStatement.executeUpdate();
-        } catch (SQLException e) {
-            throw new DaoException("insertCar() " + e.getMessage());
+        } catch (SQLException e){
+            throw new DaoException("FindAllCarResultSet()" + e.getMessage());
         } finally {
             try {
-                if (resultSet != null)
-                {
+                if(resultSet != null){
                     resultSet.close();
                 }
-                if (preparedStatement != null)
-                {
+                if(preparedStatement != null){
                     preparedStatement.close();
                 }
-                if (checkStatement != null)
-                {
-                    checkStatement.close();
-                }
-                if (connection != null)
-                {
+                if(connection != null){
                     freeConnection(connection);
                 }
-            } catch (SQLException e) {
-                throw new DaoException("insertCar() " + e.getMessage());
+            } catch (SQLException e){
+                throw new DaoException("FindAllCars()" + e.getMessage());
             }
         }
-        return code;
+        return carList;
     }
+
+    /**
+     * Main Author: Dominik Domalip
+     */
     //    Feature 2 – Find and Display (a single) Entity by Key
 //    e.g. getPlayerById(id ) – return a single entity (DTO) and display its contents.
-
-    //    **** Dominik's code ****
+//    **** Dominik's code ****
+    @Override
     public CarClass findCarById(int id) throws DaoException{
 //        Declaring needed variables, setting them to null for now
         Connection connection = null;
@@ -222,5 +119,204 @@ public class MySqlCarDao extends MySqlDao implements CarDaoInterface{
 //        at the end return our car object if it was found
         return car;
     }
-}
 
+
+    /**
+     * Main Author: Ida Tehlarova
+     * Other contributors: Dominik Domalip
+     */
+//    **** Ida's code
+//    **** Dominik upgrade - return what car has been deleted by using function findCarById() to get the object before and then after
+//    delete print out deleted car
+    public void deleteCarById(int id) throws DaoException{
+        Connection connection = null;
+        PreparedStatement preparedStatement1 = null;
+        CarClass carClass = null;
+
+        try
+        {
+            String query1 = "DELETE FROM car_rental.car WHERE id = ?";
+            connection = this.getConnection();
+            preparedStatement1 = connection.prepareStatement(query1);
+            System.out.println("Building a PreparedStatement to delete a new row in database.");
+
+            preparedStatement1.setInt(1, id);
+
+            CarClass carClass1 = findCarById(id);
+            carClass = carClass1;
+
+            preparedStatement1.executeUpdate();
+            System.out.println("--- Car deleted from database: ---\n" + carClass);
+            System.out.println("Disconnected from database");
+
+        } catch (SQLException e) {
+            throw new DaoException("deleteCarById() " + e.getMessage());
+        }
+        finally
+        {
+            try
+            {
+                if (preparedStatement1 != null)
+                {
+                    preparedStatement1.close();
+                }
+                if (connection != null)
+                {
+                    freeConnection(connection);
+                }
+            } catch (SQLException e) {
+                throw new DaoException("deleteCarById() " + e.getMessage());
+            }
+        }
+    }
+
+/**
+ * Main Author: Logan Rushe
+ * Other contributors: Dominik Domalip
+ */
+// **** Logan's code feature for inserting a new entity
+//    **** Fixed by Dominik as Logan's code was only returning int when new entity added instead of the entity itself
+    @Override
+    public CarClass insertCar(String model, String brand, String colour, int year, int price) throws DaoException {
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        PreparedStatement checkStatement = null;
+        ResultSet resultSet = null;
+        CarClass newCar = null;
+        int code = 0;
+
+        try {
+            connection = this.getConnection();
+
+            // Prepare insert statement
+            String query = "INSERT INTO car VALUES (null, ?, ?, ?, ?, ?)";
+            preparedStatement = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS); // return generated keys to be able to print the entity
+            preparedStatement.setString(1, model);
+            preparedStatement.setString(2, brand);
+            preparedStatement.setString(3, colour);
+            preparedStatement.setInt(4, year);
+            preparedStatement.setInt(5, price);
+
+            // Prepare statement to check if the car is in the table already
+            String checkQuery = "SELECT * FROM car WHERE model = ? AND brand = ?";
+            checkStatement = connection.prepareStatement(checkQuery);
+            checkStatement.setString(1, model);
+            checkStatement.setString(2, brand);
+            resultSet = checkStatement.executeQuery();
+
+            // If the car is found in the table
+            if(!resultSet.next()){
+                preparedStatement.execute();
+                ResultSet getKeys = preparedStatement.getGeneratedKeys(); // retrieve the keys that were generated
+                if(getKeys.next()){
+                    int insertedId = getKeys.getInt(1); // get id that was auto generated
+                    newCar = new CarClass(insertedId, model, brand, colour, year, price); // Create a new carClass with auto incremented id, needed for return so we see what was added
+              }
+            }
+        } catch (SQLException e) {
+            throw new DaoException("insertCar() " + e.getMessage());
+        } finally {
+            try {
+                if (resultSet != null)
+                {
+                    resultSet.close();
+                }
+                if (preparedStatement != null)
+                {
+                    preparedStatement.close();
+                }
+                if (checkStatement != null)
+                {
+                    checkStatement.close();
+                }
+                if (connection != null)
+                {
+                    freeConnection(connection);
+                }
+            } catch (SQLException e) {
+                throw new DaoException("insertCar() " + e.getMessage());
+            }
+        }
+        return newCar;
+    }
+
+    /**
+     * Main Author: Logan Rushe
+     */
+//    **** Logan's code ****
+    public List<CarClass> findCarsUsingFilter(Comparator<CarClass> carComparator) throws SQLException {
+        Connection connection = null;
+        PreparedStatement preparedStatement1 = null;
+        ResultSet resultSet = null;
+        List<CarClass> carsList;
+
+        try {
+//          adding all of our entities into the list
+            carsList = findAllCars();
+            // Sorts the list of cars using the comparator
+            carsList.sort(carComparator);
+
+        } catch (DaoException e) {
+            throw new SQLException("findCarsUsingFilter() " + e.getMessage());
+        } finally {
+            try {
+                if (preparedStatement1 != null)
+                {
+                    preparedStatement1.close();
+                }
+                if (connection != null)
+                {
+                    freeConnection(connection);
+                }
+            } catch (SQLException e) {
+                throw new SQLException("deleteCarById() " + e.getMessage());
+            } catch (DaoException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return carsList;
+    }
+
+    @Override
+    public void updateCar(int id, CarClass car) throws DaoException{
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        PreparedStatement checkStatement = null;
+        int code = 0;
+
+        try {
+            connection = this.getConnection();
+
+            // Prepare insert statement
+            String query = "UPDATE car SET model =?, brand = ?, colour = ?, production_year = ?, price = ? WHERE id = ?;";
+            preparedStatement = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
+            preparedStatement.setString(1, car.getModel());
+            preparedStatement.setString(2, car.getBrand());
+            preparedStatement.setString(3, car.getColour());
+            preparedStatement.setInt(4, car.getProduction_year());
+            preparedStatement.setInt(5, car.getPrice());
+            preparedStatement.setInt(6, id);
+
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            throw new DaoException("insertCar() " + e.getMessage());
+        } finally {
+            try {
+                if (preparedStatement != null)
+                {
+                    preparedStatement.close();
+                }
+                if (checkStatement != null)
+                {
+                    checkStatement.close();
+                }
+                if (connection != null)
+                {
+                    freeConnection(connection);
+                }
+            } catch (SQLException e) {
+                throw new DaoException("insertCar() " + e.getMessage());
+            }
+        }
+    }
+}

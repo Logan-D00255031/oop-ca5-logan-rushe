@@ -1,68 +1,186 @@
 package org.example.Ida.BusinessObjects;
+import org.example.Ida.Comparators.carYearComparatorDes;
 import org.example.Ida.DAOs.CarDaoInterface;
+import org.example.Ida.DAOs.JsonConverter;
 import org.example.Ida.DAOs.MySqlCarDao;
-import org.example.Ida.DAOs.MySqlDao;
 import org.example.Ida.DTOs.CarClass;
-import org.example.Ida.Exceptions.DaoException;
+import org.example.Ida.Exception.DaoException;
+
+import java.sql.SQLException;
 import java.util.List;
+import java.util.Scanner;
 
+/**
+ * Main Author: Dominik Domalip
+ *  - Creating the menu interface and putting everything in separate functions
+ */
+// ********* Dominik interface menu ************
 public class App {
-    public static void main(String[] args) {
-        CarDaoInterface IUserDao = new MySqlCarDao();
+    public static void main(String[] args) throws DaoException, SQLException {
+        String command = "";
 
-        try {
-            System.out.println("\nCall findAllUser()");
-            List<CarClass> cars = IUserDao.findAllCars();
-
-            if (cars.isEmpty()) {
-                System.out.println("There are no cars");
-            } else {
-                for (CarClass car : cars) {
-                    System.out.println(car.toString());
+        Scanner in = new Scanner(System.in);
+        do {
+            System.out.println("\n1. > Find all cars inside table\n2. > Find car by id\n3. > Insert car\n4. > Delete car by id\n5. > " +
+                    "Sort cars ASC\n6. > Sort cars DESC\n7. > Update car by id\nQuit > Close application");
+            command = in.next();
+            if(command.equals("1")){
+                fincAllCars();
+            } else if(command.equals("2")){
+               String id = in.next();
+                try {
+                    findCarById(Integer.parseInt(id));
+                } catch (DaoException e) {
+                    throw new RuntimeException(e);
                 }
+            } else if(command.equals("3")){
+                System.out.println("Model: Brand: Colour: Year: Price");
+                String model = in.next();
+                String brand = in.next();
+                String colour = in.next();
+                int year = in.nextInt();
+                int price = in.nextInt();
+                try {
+                    insertCar(model, brand, colour, year, price);
+                } catch (DaoException e) {
+                    throw new RuntimeException(e);
+                }
+            } else if(command.equals("4")){
+                System.out.println("Enter id: ");
+                String id = in.next();
+                deleteCar(Integer.parseInt(id));
+            } else if(command.equals("5")){
+                sortAllAscending();
+            } else if(command.equals("6")){
+                sortAllDescending();
+            } else if(command.equals("7")){
+                System.out.println("Enter id: ");
+                int id = in.nextInt();
+                System.out.println("Model: Brand: Colour: Year: Price");
+                String model = in.next();
+                String brand = in.next();
+                String colour = in.next();
+                int year = in.nextInt();
+                int price = in.nextInt();
+                try {
+                    updateCar(id, new CarClass(id,model,brand,colour,year,price));
+                } catch (DaoException e) {
+                    throw new RuntimeException(e);
+                }
+
             }
-            int code = IUserDao.insertCar(new CarClass(1, "Civic", "Honda", "Silver", 2010, 25000));
-            if(code == 1) {
-                System.out.println("\nCar added successfully");
-            } else if (code == 0) {
-                System.out.println("\nCar already exists in table");
-                }
+            }while(!command.equalsIgnoreCase("quit"));
+        }
 
-            System.out.println("\nCall deleteById() where id = 14");
-            IUserDao.deleteCarById(14);
+       public static List<CarClass> fincAllCars() {
+           CarDaoInterface IUserDao = new MySqlCarDao();
+           JsonConverter JsonConverter = new JsonConverter();
+           List<CarClass> cars;
+           try {
+               System.out.println("\n **** Call: findAllCars() ***");
+               cars = IUserDao.findAllCars();
 
-            System.out.println("\n Call: findCarById()");
-            CarClass car = IUserDao.findCarById(2);
-            if(car != null){ //null is returned if in is not valid
+               if (cars.isEmpty()) {
+                   System.out.println("No cars in the system");
+               } else {
+                   for (CarClass car : cars) {
+                       System.out.println(car.toString());
+                   }
+                   String carList = JsonConverter.carListToJson(cars);
+                   System.out.println("*** findAllCars() into Json: ***\n" + carList);
+//                   From Json to List
+                   List<CarClass> carJson = JsonConverter.JsonToCarList(carList);
+                   for(CarClass car : carJson){
+                       System.out.println(car);
+                   }
+               }
+           } catch (DaoException e) {
+               throw new RuntimeException(e);
+           }
+           return cars;
+       }
+
+        public static CarClass findCarById(int id) throws DaoException {
+            CarDaoInterface IUserDao = new MySqlCarDao();
+            JsonConverter JsonConverter = new JsonConverter();
+            System.out.println("\n *** Call: findCarById() ***");
+            CarClass car = IUserDao.findCarById(id);
+            String carJson = JsonConverter.carObjectToJson(car);
+            if (car != null) { //null is returned if in is not valid
                 System.out.println("Car found: " + car);
+                System.out.println("Car found Json: " + carJson + "\n");
             } else {
                 System.out.println("Car with this id not found in database");
             }
-
-        } catch (DaoException e) {
-            e.printStackTrace();
+            return car;
         }
-    }
+
+        public static CarClass insertCar(String model, String brand, String colour, int year, int price) throws DaoException {
+            CarDaoInterface IUserDao = new MySqlCarDao();
+            JsonConverter JsonConverter = new JsonConverter();
+            System.out.println("*** Calling insertCar(): ***");
+        CarClass newCar = IUserDao.insertCar(model, brand, colour, year, price);
+        if (newCar != null) {
+            System.out.println("New entity added: " + newCar);
+            String jsonCar = JsonConverter.carObjectToJson(newCar);
+            System.out.println("Entity in Json string:\n" + jsonCar);
+
+        } else {
+            System.out.println("Entity was not added.");
+             }
+            return newCar;
+        }
+
+
+        static void updateCar(int id, CarClass car) throws DaoException{
+            CarDaoInterface IUserDao = new MySqlCarDao();
+            System.out.println("*** Updating car by id ***");
+            IUserDao.updateCar(id, car);
+        }
+
+
+    static void deleteCar(int id) throws DaoException {
+            CarDaoInterface IUserDao = new MySqlCarDao();
+            System.out.println("*** Deleting an entity by id ***");
+            IUserDao.deleteCarById(id);
+        }
+
+       public static List<CarClass> sortAllAscending() throws SQLException {
+            CarDaoInterface IUserDao = new MySqlCarDao();
+            JsonConverter JsonConverter = new JsonConverter();
+            System.out.println("\n*** Call findCarsUsingFilter(), sorting list by production year ***");
+//      sorting our car list with our finCarUsingFilter(comparator) function where our comparator is a lamba expression that
+//      takes in two objects c1 and c2 and then compares their production year giving us list sorted in ascending order by year
+        List<CarClass> sortedCars = IUserDao.findCarsUsingFilter((c1, c2) -> Integer.compare(c1.getProduction_year(), c2.getProduction_year()));
+
+
+        if (sortedCars.isEmpty()) {
+            System.out.println("There are no cars in the database");
+        } else {
+            for (CarClass sortedcar : sortedCars) {
+                System.out.println(sortedcar.toString());
+                }
+            }
+           return sortedCars;
+       }
+
+       public static List<CarClass> sortAllDescending() throws SQLException {
+            CarDaoInterface IUserDao = new MySqlCarDao();
+            JsonConverter JsonConverter = new JsonConverter();
+            System.out.println("\n*** Call findCarUsingFilter(carYearComparatorDesc ***");
+//        using our carYearComparator for descending order
+            List<CarClass> sortedCars;
+        sortedCars = IUserDao.findCarsUsingFilter(new carYearComparatorDes());
+
+        if (sortedCars.isEmpty()) {
+            System.out.println("There are no cars in the database");
+        } else {
+            for (CarClass sortedcar : sortedCars) {
+                System.out.println(sortedcar.toString());
+            }
+        }
+           return sortedCars;
+       }
 }
-
-
-/* TODO ask dermot to help with the output cause why is there '
-    Features 1 - Dominik - done
-    Feature 2 - Dominik - done
-    Feature 3 - Ida - done
-    Feature 4 - Logan - done
- */
-
-
-
-
-
-
-
-
-
-
-
-
 
 
