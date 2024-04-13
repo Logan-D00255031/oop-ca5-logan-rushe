@@ -75,7 +75,9 @@ public class MySqlCarDao extends MySqlDao implements CarDaoInterface {
     //  **** Fixed by Dominik as My code was returning an int instead of the Car entity inserted
     /**
      * Main Author: Logan Rushe
+     * <p>
      * Other contributors: Dominik Domalip
+     * <p>
      * Insert a given Car into the car table
      * @param car The car object to be inserted
      * @return The inserted Car if successful, or the Car will be NULL if it's already contained within the table
@@ -213,6 +215,7 @@ public class MySqlCarDao extends MySqlDao implements CarDaoInterface {
 
     /**
      * Main Author: Ida Tehlarova
+     * <p>
      * Other contributors: Dominik Domalip
      */
     //    **** Ida's code
@@ -294,6 +297,7 @@ public class MySqlCarDao extends MySqlDao implements CarDaoInterface {
 
     /**
      * Main Author: Ida Tehlarova
+     * <p>
      * Other contributors: Logan Rushe
      */
     @Override

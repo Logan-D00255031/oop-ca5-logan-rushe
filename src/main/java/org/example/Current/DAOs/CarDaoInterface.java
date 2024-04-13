@@ -11,6 +11,7 @@ public interface CarDaoInterface {
 
     /**
      * Main Author: Logan Rushe
+     * <p>
      * Insert a given Car into the car table
      * @param car The car object to be inserted
      * @return The inserted Car if successful, or the Car will be NULL if it's already contained within the table
@@ -21,6 +22,7 @@ public interface CarDaoInterface {
 
     /**
      * Main Author: Logan Rushe
+     * <p>
      * Returns a sorted list of Cars from the database
      * @param carComparator The comparator used to sort the list
      * @return The sorted Car List
