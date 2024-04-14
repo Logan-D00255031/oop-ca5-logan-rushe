@@ -17,10 +17,6 @@ public class AppTest {
         //resetCarTable.resetTable();
     }
 
-    // Change id to the id that it will be when added to the database for the test to succeed
-    /* TODO
-        Create a MySqlCarDao that has a function to reset the database to remove manually changing tests
-     */
     @Test
     public void insertTest1() throws SQLException {
         assertEquals(new Car(16, "model", "brand", "colour", 2000, 10000), ICarDao.insertCar(new Car(1, "model", "brand", "colour", 2000, 10000)));

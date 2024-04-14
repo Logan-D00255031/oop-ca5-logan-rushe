@@ -171,7 +171,7 @@ public class MySqlCarDao extends MySqlDao implements CarDaoInterface {
             // from the super class (MySqlDao.java)
             connection = this.getConnection();
 
-            String query = "";
+            String query = "DELETE FROM car"; // Clears ALL DATA from the car table
             preparedStatement = connection.prepareStatement(query);
 
             //Using a PreparedStatement to execute SQL...

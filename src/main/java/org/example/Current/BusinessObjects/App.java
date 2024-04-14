@@ -1,4 +1,4 @@
-package org.example.Current;
+package org.example.Current.BusinessObjects;
 
 import org.example.Current.Comparators.carYearComparatorDesc;
 import org.example.Current.DAOs.CarDaoInterface;
@@ -83,6 +83,6 @@ public class App {
     Feature 2 - Dominik - done
     Feature 3 -   Ida   - done
     Feature 4 -  Logan  - done
-    Feature 5 -   Ida   - TBD
+    Feature 5 -   Ida   - done
     Feature 6 -  Logan  - done
  */
