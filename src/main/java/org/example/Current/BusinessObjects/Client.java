@@ -39,8 +39,9 @@ public class Client {
             //ask user to enter a command
             Scanner consoleInput = new Scanner(System.in);
             ClientServerCommands commands = new ClientServerCommands();
-            System.out.printf("Valid commands are: \"%s <integer>\", \"%s\", \"%s <integer>\", \"%s\", \"%s [fileName]\", \"Exit\"\n",
-                    commands.DisplayCarById, commands.DisplayAllCars, commands.DeleteCarById, commands.GetImagesList, commands.GetImage);
+            System.out.printf("Valid commands are: \"%s <integer>\", \"%s\", \"%s [model] [brand] [colour] [productionYear] [price]\", \"%s <integer>\", " +
+                            "\"%s\", \"%s [fileName]\", \"Exit\"\n",
+                    commands.DisplayCarById, commands.DisplayAllCars, commands.AddACar, commands.DeleteCarById, commands.GetImagesList, commands.GetImage);
             System.out.println("Please enter a command: ");
             String userRequest = consoleInput.nextLine();
             JsonConverter jsonConverter = new JsonConverter();
@@ -81,6 +82,17 @@ public class Client {
                     for (Car car : list) {
                         displayCar(car);
                     }
+                }
+                /**
+                 * Main Author: Dominik Domalip
+                 * <p>
+                 * Other contributors: Logan Rushe
+                 */
+                else if(userRequest.startsWith(commands.AddACar)){
+                    System.out.println("Client: Receiving response from server...");
+    //                get response from the server with entity or error message
+                    String newCar = in.readLine();
+                    System.out.println("Client: New entity was added into database. New entity: " + "\n" + newCar);
                 }
                 /**
                  * Main Author: Ida Tehlarova

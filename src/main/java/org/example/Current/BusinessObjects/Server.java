@@ -134,6 +134,31 @@ class ClientHandler implements Runnable   // each ClientHandler communicates wit
                     socketWriter.println(jsonCarList);
                 }
                 /**
+                 * Main Author: Dominik Domalip
+                 * <p>
+                 * Other contributors: Logan Rushe
+                 */
+                else if(request.startsWith(commands.AddACar)) {
+//                      split input into parts, so we can find parts for input
+                    String[] parts = request.split(" ");
+                    //  parsing string data into integer needed
+                    int production_year = Integer.parseInt(parts[6]);
+                    int price = Integer.parseInt(parts[7]);
+                    //  creating an instance for the requested insert
+                    Car carRequest = new Car(0, parts[3], parts[4], parts[5], production_year, price);
+//                        calling onto insertCar function in DAO with our interface and passing in requested data from carRequest instance
+                    Car newCar = ICarDao.insertCar(carRequest);
+//                        if newCar is not null meaning it was added so print message and send result to client
+                    if(newCar != null){
+                        System.out.println("Server message: Entity successfully added. Entity: " + "\n" + newCar);
+                        String jsonNewCar = jsonHandler.carObjectToJson(newCar);
+                        socketWriter.println(jsonNewCar);
+//                            otherwise print message when failed to add, meaning entity already exists or was not able to insert
+                    } else {
+                        System.out.println("Server message: Entity failed to add.");
+                    }
+                }
+                /**
                  * Main Author: Ida Tehlarova
                  */
                 else if(request.startsWith(commands.DeleteCarById)){
