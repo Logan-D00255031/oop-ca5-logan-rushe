@@ -3,7 +3,7 @@ import org.example.Ida.Comparators.carYearComparatorDes;
 import org.example.Ida.DAOs.CarDaoInterface;
 import org.example.Ida.DAOs.JsonConverter;
 import org.example.Ida.DAOs.MySqlCarDao;
-import org.example.Ida.DTOs.CarClass;
+import org.example.Ida.DTOs.Car;
 import org.example.Ida.Exception.DaoException;
 
 import java.sql.SQLException;
@@ -63,7 +63,7 @@ public class App {
                 int year = in.nextInt();
                 int price = in.nextInt();
                 try {
-                    updateCar(id, new CarClass(id,model,brand,colour,year,price));
+                    updateCar(id, new Car(id,model,brand,colour,year,price));
                 } catch (DaoException e) {
                     throw new RuntimeException(e);
                 }
@@ -72,10 +72,10 @@ public class App {
             }while(!command.equalsIgnoreCase("quit"));
         }
 
-       public static List<CarClass> fincAllCars() {
+       public static List<Car> fincAllCars() {
            CarDaoInterface IUserDao = new MySqlCarDao();
            JsonConverter JsonConverter = new JsonConverter();
-           List<CarClass> cars;
+           List<Car> cars;
            try {
                System.out.println("\n **** Call: findAllCars() ***");
                cars = IUserDao.findAllCars();
@@ -83,14 +83,14 @@ public class App {
                if (cars.isEmpty()) {
                    System.out.println("No cars in the system");
                } else {
-                   for (CarClass car : cars) {
+                   for (Car car : cars) {
                        System.out.println(car.toString());
                    }
                    String carList = JsonConverter.carListToJson(cars);
                    System.out.println("*** findAllCars() into Json: ***\n" + carList);
 //                   From Json to List
-                   List<CarClass> carJson = JsonConverter.JsonToCarList(carList);
-                   for(CarClass car : carJson){
+                   List<Car> carJson = JsonConverter.jsonToCarList(carList);
+                   for(Car car : carJson){
                        System.out.println(car);
                    }
                }
@@ -100,11 +100,11 @@ public class App {
            return cars;
        }
 
-        public static CarClass findCarById(int id) throws DaoException {
+        public static Car findCarById(int id) throws DaoException {
             CarDaoInterface IUserDao = new MySqlCarDao();
             JsonConverter JsonConverter = new JsonConverter();
             System.out.println("\n *** Call: findCarById() ***");
-            CarClass car = IUserDao.findCarById(id);
+            Car car = IUserDao.findCarById(id);
             String carJson = JsonConverter.carObjectToJson(car);
             if (car != null) { //null is returned if in is not valid
                 System.out.println("Car found: " + car);
@@ -115,11 +115,11 @@ public class App {
             return car;
         }
 
-        public static CarClass insertCar(String model, String brand, String colour, int year, int price) throws DaoException {
+        public static Car insertCar(String model, String brand, String colour, int year, int price) throws DaoException {
             CarDaoInterface IUserDao = new MySqlCarDao();
             JsonConverter JsonConverter = new JsonConverter();
             System.out.println("*** Calling insertCar(): ***");
-        CarClass newCar = IUserDao.insertCar(model, brand, colour, year, price);
+        Car newCar = IUserDao.insertCar(model, brand, colour, year, price);
         if (newCar != null) {
             System.out.println("New entity added: " + newCar);
             String jsonCar = JsonConverter.carObjectToJson(newCar);
@@ -132,7 +132,7 @@ public class App {
         }
 
 
-        static void updateCar(int id, CarClass car) throws DaoException{
+        static void updateCar(int id, Car car) throws DaoException{
             CarDaoInterface IUserDao = new MySqlCarDao();
             System.out.println("*** Updating car by id ***");
             IUserDao.updateCar(id, car);
@@ -145,42 +145,41 @@ public class App {
             IUserDao.deleteCarById(id);
         }
 
-       public static List<CarClass> sortAllAscending() throws SQLException {
+       public static List<Car> sortAllAscending() throws SQLException {
             CarDaoInterface IUserDao = new MySqlCarDao();
             JsonConverter JsonConverter = new JsonConverter();
             System.out.println("\n*** Call findCarsUsingFilter(), sorting list by production year ***");
 //      sorting our car list with our finCarUsingFilter(comparator) function where our comparator is a lamba expression that
 //      takes in two objects c1 and c2 and then compares their production year giving us list sorted in ascending order by year
-        List<CarClass> sortedCars = IUserDao.findCarsUsingFilter((c1, c2) -> Integer.compare(c1.getProduction_year(), c2.getProduction_year()));
+        List<Car> sortedCars = IUserDao.findCarsUsingFilter((c1, c2) -> Integer.compare(c1.getProductionYear(), c2.getProductionYear()));
 
 
         if (sortedCars.isEmpty()) {
             System.out.println("There are no cars in the database");
         } else {
-            for (CarClass sortedcar : sortedCars) {
+            for (Car sortedcar : sortedCars) {
                 System.out.println(sortedcar.toString());
                 }
             }
            return sortedCars;
        }
 
-       public static List<CarClass> sortAllDescending() throws SQLException {
+       public static List<Car> sortAllDescending() throws SQLException {
             CarDaoInterface IUserDao = new MySqlCarDao();
             JsonConverter JsonConverter = new JsonConverter();
             System.out.println("\n*** Call findCarUsingFilter(carYearComparatorDesc ***");
 //        using our carYearComparator for descending order
-            List<CarClass> sortedCars;
+            List<Car> sortedCars;
         sortedCars = IUserDao.findCarsUsingFilter(new carYearComparatorDes());
 
         if (sortedCars.isEmpty()) {
             System.out.println("There are no cars in the database");
         } else {
-            for (CarClass sortedcar : sortedCars) {
+            for (Car sortedcar : sortedCars) {
                 System.out.println(sortedcar.toString());
             }
         }
            return sortedCars;
        }
 }
-
 

@@ -1,98 +1,110 @@
 package org.example.Ida.BusinessObjects;
-import org.example.Ida.DTOs.CarClass;
-import org.example.Ida.DAOs.JsonConverter;
-import org.example.Ida.DAOs.MySqlCarDao;
-import org.example.Ida.DAOs.CarDaoInterface;
-import org.example.Ida.Exception.DaoException;
+
+import org.example.Ida.DTOs.Car;
 
 import java.io.*;
 import java.net.Socket;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 
+import org.example.Ida.DAOs.JsonConverter;
+
 /**
- * Main Author: Dominik Domalip
+ * Main Author: Logan Rushe
  */
 public class ClientMenu {
     public static void main(String[] args) {
-        ClientMenu clientMenu = new ClientMenu();
-        clientMenu.start();
+        ClientMenu client = new ClientMenu();
+        client.start();
     }
 
-    public void start(){
-        // Json class converter to get car class from json later on
-        JsonConverter JsonConverter = new JsonConverter();
-        CarDaoInterface IUserDao = new MySqlCarDao();
+    public void displayCar(Car car) {
+        System.out.printf("%-5d %-12s %-20s %-10s %-19d %5d \n",
+                car.getId(),
+                car.getModel(),
+                car.getBrand(),
+                car.getColour(),
+                car.getProductionYear(),
+                car.getPrice()
+        ); // Display the car data in table format
+    }
 
-        /**
-         * Main Author: Dominik Domalip
-         */
-        // try to connect to server with port 7777
-        try ( Socket socket = new Socket("localhost", 7777);
-              // printWritter send data to server
-              PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
-              // bufferedReader to receive data from server
-              BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-                ){
-            System.out.println("Client Menu message: The Client Menu is running and has connected to the server.");
+    public void start() {
+
+        try (   // create socket to connect to the server
+                Socket socket = new Socket("localhost", 8888);
+                // get the socket's input and output streams, and wrap them in writer and readers
+                PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+                BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+        ) {
+            System.out.println("Client: The Client is running and has connected to the server");
+            //ask user to enter a command
             Scanner consoleInput = new Scanner(System.in);
-            System.out.println("Valid commands: " + "\n" + "display ID" + "\n" + "displayAll" + "\n" + "add model brand colour production_year price" +
-                    "\n" + "delete ID");
-            System.out.println("Enter command: ");
-            String userInput = consoleInput.nextLine();
-            out.println(userInput);
+            ClientServerCommands commands = new ClientServerCommands();
+            System.out.printf("Valid commands are: \"%s <integer>\",\"display all cars\",\"delete car by id <integer>\", \"quit\"\n", commands.DisplayCarById);
+            System.out.println("Please enter a command: ");
+            String userRequest = consoleInput.nextLine();
+            JsonConverter jsonConverter = new JsonConverter();
 
-            if(userInput.startsWith("displayEntity")){
-                // receive output from server in Json format
-                String carJson = in.readLine();
-                // turn json format into car class and then print into console
-                CarClass car = JsonConverter.fromJson(carJson);
-                System.out.println("Client Menu message: Response from server: \"" + car + "\n" );
-            } else if(userInput.startsWith("displayAll")){
-                String cars = in.readLine();
-                System.out.println("Client Menu message: Received from server: " +"\n" + cars + "\n");
-                List<CarClass> allCars = JsonConverter.JsonToCarList(cars);
-                for(CarClass car : allCars){
-                    System.out.println(car);
+            while (true) {
+                // send the command to the server on the socket
+                out.println(userRequest);      // write the request to socket along with a newline terminator (which is required)
+                // out.flush();                      // flushing buffer NOT necessary as auto flush is set to true
+
+                // process the answer returned by the server
+                if (userRequest.startsWith(commands.DisplayCarById)) // if user asked for "display car by id", we expect the server to return a car (in milliseconds)
+                {
+                    String jsonString = in.readLine();
+
+                    if (jsonString.contains("}")) { // Server returned a JSON String
+                        Car car = jsonConverter.fromJson(jsonString); // Convert JSON String to car Object
+                        System.out.println("Car received!");
+                        // Display the car in table format
+                        System.out.printf("%-5s %-12s %-20s %-10s %s %9s \n", "Id", "Model", "Brand", "Colour", "Production Year", "Price");
+                        displayCar(car);
+                    } else { // Car was not found
+                        System.out.println("Client message: Response from server after \"display car by id\" request: " + jsonString);
+                    }
+
+                    //Ida
+                } else if (userRequest.startsWith(commands.DisplayAllCars)) {
+                    String jsonString = in.readLine();  // wait for response from server
+                    List<Car> list = jsonConverter.jsonToCarList(jsonString); // Convert JSON String to car Object
+
+                    System.out.println("Displaying all cars!");
+
+                    for (Car car : list) {
+                        displayCar(car);
+                        Car car2 = jsonConverter.fromJson(jsonString);
+                        System.out.println("Car received!");
+                    }
+                } else if(userRequest.startsWith(commands.DeleteCarById)){
+                    String boobies = in.readLine();
+                    System.out.println(boobies);
                 }
-            } else if(userInput.startsWith("add")){
-//                split input into parts so we can find parts for input
-                String[] parts = userInput.split(" ");
-//                parsing string data into integer needed
-                int production_year = Integer.parseInt(parts[4]);
-                int price = Integer.parseInt(parts[5]);
-//                creating an instance for the requested insert
-                CarClass insertRequest = new CarClass(0, parts[1], parts[2], parts[3], production_year, price);
-                String jsonRequest = JsonConverter.carObjectToJson(insertRequest);
-                System.out.println("Client Menu message: Sending out " + jsonRequest);
-//                send the request to the server
-                out.println(jsonRequest);
-                System.out.println("Client Menu message: Receiving response from server...");
-//                get response from the server with entity or error message
-                String newCar = in.readLine();
-                System.out.println("Client Menu message: New entity was added into database. New entity: " + "\n" + newCar);
-            } else if(userInput.startsWith("delete")){
-//                splitting input to be able to pass id in
-                String[] parts = userInput.split(" ");
-                int id = Integer.parseInt(parts[1]);
-//                using dao function find car by id so we can put it into json format, this could be just done with request as int id but since the specification
-//                says to send to server request in Json, I am using this function to get car with that id and parsing it into json
-                CarClass request = IUserDao.findCarById(id);
-//                carclass to json
-                String requestJson = JsonConverter.carObjectToJson(request);
-                System.out.println("Client Menu message: Sending request to server to delete: " + requestJson);
-//                send request to sever
-                out.println(requestJson);
-                String income = in.readLine();
-                System.out.println(income + requestJson);
-            }
-        } catch (IOException e){
-            System.out.println("Client message: IOException: " + e);
-        } catch (DaoException e) {
-            throw new RuntimeException(e);
-        }
-        System.out.println("Exiting client, but server may still be running");
-    }
 
+                else if (userRequest.startsWith("quit")) // if the user has entered the "quit" command
+                {
+                    String response = in.readLine();   // wait for response -
+                    System.out.println("Client message: Response from server: \"" + response + "\"");
+                    break;  // break out of while loop, client will exit.
+                } else {
+                    System.out.println("Command unknown. Try again.");
+                }
+
+                consoleInput = new Scanner(System.in);
+                System.out.println("Valid commands are: \"time\" to get time, or \"echo <message>\" to get message echoed back, \"quit\"");
+                System.out.println("Please enter a command: ");
+                userRequest = consoleInput.nextLine();
+            }
+        } catch (IOException e) {
+            System.out.println("Client message: IOException: " + e);
+        }
+        // sockets and streams are closed automatically due to try-with-resources
+        // so no finally block required here.
+
+        System.out.println("Exiting client, but server may still be running.");
+    }
 }
+
+//  LocalTime time = LocalTime.parse(timeString); // Parse String -> convert to LocalTime object if required LocalTime.parse(timeString); // Parse timeString -> convert to LocalTime object if required

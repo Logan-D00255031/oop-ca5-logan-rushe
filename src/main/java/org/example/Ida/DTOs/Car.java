@@ -2,20 +2,20 @@ package org.example.Ida.DTOs;
 
 import java.util.Objects;
 
-public class CarClass {
+public class Car implements Comparable<Car> {
     private int id;
     private String model;
     private String brand;
     private String colour;
-    private int production_year;
+    private int productionYear;
     private int price;
 
-    public CarClass(int id, String model, String brand, String colour, int production_year, int price){
+    public Car(int id, String model, String brand, String colour, int productionYear, int price) {
         this.id = id;
         this.model = model;
         this.brand = brand;
         this.colour = colour;
-        this.production_year = production_year;
+        this.productionYear = productionYear;
         this.price = price;
     }
 
@@ -51,12 +51,12 @@ public class CarClass {
         this.colour = colour;
     }
 
-    public int getProduction_year() {
-        return production_year;
+    public int getProductionYear() {
+        return productionYear;
     }
 
-    public void setProduction_year(int production_year) {
-        this.production_year = production_year;
+    public void setProductionYear(int productionYear) {
+        this.productionYear = productionYear;
     }
 
     public int getPrice() {
@@ -69,31 +69,31 @@ public class CarClass {
 
     @Override
     public String toString() {
-        return "CarClass{" +
+        return "Car{" +
                 "id=" + id +
                 ", model='" + model + '\'' +
                 ", brand='" + brand + '\'' +
                 ", colour='" + colour + '\'' +
-                ", production_year=" + production_year +
+                ", productionYear=" + productionYear +
                 ", price=" + price +
                 '}';
     }
-
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        CarClass car = (CarClass) o;
-        return id == car.id && production_year == car.production_year && price == car.price && Objects.equals(model, car.model) && Objects.equals(brand, car.brand) && Objects.equals(colour, car.colour);
+        Car car = (Car) o;
+        return id == car.id && productionYear == car.productionYear && price == car.price && Objects.equals(model, car.model) && Objects.equals(brand, car.brand) && Objects.equals(colour, car.colour);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, model, brand, colour, production_year, price);
+        return Objects.hash(id, model, brand, colour, productionYear, price);
     }
 
-    public int compareTo(CarClass other) {
+    @Override
+    public int compareTo(Car other) {
         if(this.brand.equals(other.brand))
             return this.model.compareTo(other.model);
         else

@@ -1,10 +1,7 @@
 package org.example.Ida.DAOs;
-import org.example.Ida.DTOs.CarClass;
+import org.example.Ida.DTOs.Car;
 import org.example.Ida.Exception.DaoException;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 
-import java.security.PublicKey;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -15,11 +12,11 @@ public class MySqlCarDao extends MySqlDao implements CarDaoInterface{
      * Main Author: Dominik Domalip
      */
     @Override
-    public List<CarClass> findAllCars() throws DaoException {
+    public List<Car> findAllCars() throws DaoException {
         Connection connection = null;
         PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;
-        List<CarClass> carList = new ArrayList<>();
+        List<Car> carList = new ArrayList<>();
         try {
             connection =  this.getConnection();
 
@@ -35,7 +32,7 @@ public class MySqlCarDao extends MySqlDao implements CarDaoInterface{
                 int production_year = resultSet.getInt("PRODUCTION_YEAR");
                 int price = resultSet.getInt("PRICE");
 
-                CarClass u = new CarClass(id, model, brand, colour, production_year, price);
+                Car u = new Car(id, model, brand, colour, production_year, price);
                 carList.add(u);
             }
         } catch (SQLException e){
@@ -65,12 +62,12 @@ public class MySqlCarDao extends MySqlDao implements CarDaoInterface{
 //    e.g. getPlayerById(id ) – return a single entity (DTO) and display its contents.
 //    **** Dominik's code ****
     @Override
-    public CarClass findCarById(int id) throws DaoException{
+    public Car findCarById(int id) throws DaoException{
 //        Declaring needed variables, setting them to null for now
         Connection connection = null;
         PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;
-        CarClass car = null;
+        Car car = null;
         //            Everything in the try block will try to execute code inside, if not
         try {
 // setting connection variable to the function that connects to our database
@@ -93,7 +90,7 @@ public class MySqlCarDao extends MySqlDao implements CarDaoInterface{
                 int production_year = resultSet.getInt("PRODUCTION_YEAR");
                 int price = resultSet.getInt("PRICE");
 // then create a new object of a type CarClass and put our values into it, if it is found
-                car = new CarClass(carId, model, brand, colour, production_year, price);
+                car = new Car(carId, model, brand, colour, production_year, price);
             }
 //            catch if our try block does not run
         } catch (SQLException e){
@@ -131,7 +128,7 @@ public class MySqlCarDao extends MySqlDao implements CarDaoInterface{
     public void deleteCarById(int id) throws DaoException{
         Connection connection = null;
         PreparedStatement preparedStatement1 = null;
-        CarClass carClass = null;
+        Car carClass = null;
 
         try
         {
@@ -142,7 +139,7 @@ public class MySqlCarDao extends MySqlDao implements CarDaoInterface{
 
             preparedStatement1.setInt(1, id);
 
-            CarClass carClass1 = findCarById(id);
+            Car carClass1 = findCarById(id);
             carClass = carClass1;
 
             preparedStatement1.executeUpdate();
@@ -177,12 +174,12 @@ public class MySqlCarDao extends MySqlDao implements CarDaoInterface{
 // **** Logan's code feature for inserting a new entity
 //    **** Fixed by Dominik as Logan's code was only returning int when new entity added instead of the entity itself
     @Override
-    public CarClass insertCar(String model, String brand, String colour, int year, int price) throws DaoException {
+    public Car insertCar(String model, String brand, String colour, int year, int price) throws DaoException {
         Connection connection = null;
         PreparedStatement preparedStatement = null;
         PreparedStatement checkStatement = null;
         ResultSet resultSet = null;
-        CarClass newCar = null;
+        Car newCar = null;
         int code = 0;
 
         try {
@@ -210,7 +207,7 @@ public class MySqlCarDao extends MySqlDao implements CarDaoInterface{
                 ResultSet getKeys = preparedStatement.getGeneratedKeys(); // retrieve the keys that were generated
                 if(getKeys.next()){
                     int insertedId = getKeys.getInt(1); // get id that was auto generated
-                    newCar = new CarClass(insertedId, model, brand, colour, year, price); // Create a new carClass with auto incremented id, needed for return so we see what was added
+                    newCar = new Car(insertedId, model, brand, colour, year, price); // Create a new carClass with auto incremented id, needed for return so we see what was added
               }
             }
         } catch (SQLException e) {
@@ -244,11 +241,11 @@ public class MySqlCarDao extends MySqlDao implements CarDaoInterface{
      * Main Author: Logan Rushe
      */
 //    **** Logan's code ****
-    public List<CarClass> findCarsUsingFilter(Comparator<CarClass> carComparator) throws SQLException {
+    public List<Car> findCarsUsingFilter(Comparator<Car> carComparator) throws SQLException {
         Connection connection = null;
         PreparedStatement preparedStatement1 = null;
         ResultSet resultSet = null;
-        List<CarClass> carsList;
+        List<Car> carsList;
 
         try {
 //          adding all of our entities into the list
@@ -278,7 +275,7 @@ public class MySqlCarDao extends MySqlDao implements CarDaoInterface{
     }
 
     @Override
-    public void updateCar(int id, CarClass car) throws DaoException{
+    public void updateCar(int id, Car car) throws DaoException{
         Connection connection = null;
         PreparedStatement preparedStatement = null;
         PreparedStatement checkStatement = null;
@@ -293,7 +290,7 @@ public class MySqlCarDao extends MySqlDao implements CarDaoInterface{
             preparedStatement.setString(1, car.getModel());
             preparedStatement.setString(2, car.getBrand());
             preparedStatement.setString(3, car.getColour());
-            preparedStatement.setInt(4, car.getProduction_year());
+            preparedStatement.setInt(4, car.getProductionYear());
             preparedStatement.setInt(5, car.getPrice());
             preparedStatement.setInt(6, id);
 

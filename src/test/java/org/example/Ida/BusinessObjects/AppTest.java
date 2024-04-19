@@ -1,13 +1,11 @@
 package org.example.Ida.BusinessObjects;
 
-import org.example.Ida.DTOs.CarClass;
+import org.example.Ida.DTOs.Car;
 import org.example.Ida.DAOs.MySqlCarDao;
 import org.example.Ida.Exception.DaoException;
 import org.junit.Test;
 
-import java.sql.SQLException;
-
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 public class AppTest {
     MySqlCarDao ICarDao = new MySqlCarDao();
