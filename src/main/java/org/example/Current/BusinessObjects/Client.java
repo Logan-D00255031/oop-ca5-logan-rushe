@@ -2,6 +2,7 @@ package org.example.Current.BusinessObjects;
 
 import org.example.Current.DTOs.Car;
 
+import java.util.List;
 import java.io.*;
 import java.net.Socket;
 import java.util.Scanner;
@@ -38,34 +39,91 @@ public class Client {
             //ask user to enter a command
             Scanner consoleInput = new Scanner(System.in);
             ClientServerCommands commands = new ClientServerCommands();
-            System.out.printf("Valid commands are: \"%s <integer>\", \"quit\"\n", commands.DisplayCarById);
+            System.out.printf("Valid commands are: \"%s <integer>\", \"%s\", \"%s [fileName]\", \"Exit\"\n", commands.DisplayCarById, commands.GetImagesList, commands.GetImage);
             System.out.println("Please enter a command: ");
             String userRequest = consoleInput.nextLine();
             JsonConverter jsonConverter = new JsonConverter();
+            DataInputStream dataInputStream = null;
 
             while(true) {
                 // send the command to the server on the socket
-                out.println(userRequest);      // write the request to socket along with a newline terminator (which is required)
-                // out.flush();                      // flushing buffer NOT necessary as auto flush is set to true
+                out.println(userRequest);      // write the request to socket along with a newline terminator (required)
 
                 // process the answer returned by the server
-                if (userRequest.startsWith(commands.DisplayCarById)) // if user asked for "display car by id", we expect the server to return a car (in milliseconds)
+                /**
+                 * Main Author: Logan Rushe
+                 */
+                if (userRequest.startsWith(commands.DisplayCarById)) // if user asked for "display car by id", we expect the server to return a car
                 {
-                    String timeString = in.readLine();
-                    if(timeString.contains("}")) { // Server returned a JSON String
-                        Car car = jsonConverter.fromJson(timeString); // Convert JSON String to car Object
+                    String response = in.readLine(); // Wait for response
+                    if(response.contains("}")) { // Server returned a JSON String
+                        Car car = jsonConverter.fromJson(response); // Convert JSON String to car Object
                         System.out.println("Car received!");
                         // Display the car in table format
                         System.out.printf("%-5s %-12s %-20s %-10s %s %9s \n", "Id", "Model", "Brand", "Colour", "Production Year", "Price");
                         displayCar(car);
                     } else { // Car was not found
-                        System.out.println("Client message: Response from server after \"display car by id\" request: " + timeString);
+                        System.out.println("Client: Response from server after \"display car by id\" request: " + response);
                     }
                 }
-                else if (userRequest.startsWith("quit")) // if the user has entered the "quit" command
+                /**
+                 * Main Author: Logan Rushe
+                 */
+                else if (userRequest.startsWith(commands.GetImagesList)) // if the user has entered the "get images list" command
                 {
-                    String response = in.readLine();   // wait for response -
-                    System.out.println("Client message: Response from server: \"" + response + "\"");
+                    String response = in.readLine();   // Wait for response
+                    System.out.println("Client: Response from server: " + response + "");
+                    List<String> imagesList = jsonConverter.JsonToStringList(response);
+                    System.out.println("To select an image to download, type \"get image [imageName].jpg\"\nAvailable Images: ");
+                    for (String image : imagesList) { System.out.println(image); }
+                }
+                /**
+                 * Main Author: Logan Rushe
+                 */
+                else if (userRequest.startsWith(commands.GetImage)) // if the user has entered the "get image" command
+                {
+                    String response = in.readLine();
+                    if (response.equals("ERROR: File not found")) {
+                        System.out.println("Client: Response from server: " + response);
+                    } else {
+                        System.out.println("Server: " + response);
+                        dataInputStream = new DataInputStream(socket.getInputStream());
+
+                        String[] userCommands = userRequest.split(" ");
+                        String fileName = "Received images/" + userCommands[2];
+                        int bytes = 0;
+                        FileOutputStream fileOutputStream = new FileOutputStream(fileName);
+
+                        // read the size of the file in bytes (the file length)
+                        long size = dataInputStream.readLong();
+                        System.out.println("Server: file size in bytes = " + size);
+
+                        // create a buffer to receive the incoming bytes from the socket
+                        byte[] buffer = new byte[4 * 1024];         // 4 kilobyte buffer
+
+                        System.out.println("Client: Bytes remaining to be read from socket: ");
+
+                        // next, read the raw bytes in chunks (buffer size) that make up the image file
+                        while (size > 0 && (bytes = dataInputStream.read(buffer, 0, (int) Math.min(buffer.length, size))) != -1) {
+
+                            // write the buffer data into the local file
+                            fileOutputStream.write(buffer, 0, bytes);
+
+                            // reduce the 'size' by the number of bytes read in.
+                            size = size - bytes;
+                            System.out.print(size + ", ");
+                        }
+
+                        System.out.println("Image Downloaded!");
+                        System.out.printf("Look in the Received images folder to see the downloaded file: %s\n", fileName);
+
+                        fileOutputStream.close();
+                    }
+                }
+                else if (userRequest.startsWith("Exit")) // if the user has entered the "Exit" command
+                {
+                    String response = in.readLine();   // Wait for response
+                    System.out.println("Client: Response from server: " + response);
                     break;  // break out of while loop, client will exit.
                 }
                 else {
@@ -73,12 +131,15 @@ public class Client {
                 }
 
                 consoleInput = new Scanner(System.in);
-                System.out.println("Valid commands are: \"time\" to get time, or \"echo <message>\" to get message echoed back, \"quit\"");
+                System.out.printf("\nValid commands are: \"%s <integer>\", \"%s\", \"%s [fileName]\", \"Exit\"\n", commands.DisplayCarById, commands.GetImagesList, commands.GetImage);
                 System.out.println("Please enter a command: ");
                 userRequest = consoleInput.nextLine();
             }
+            if (dataInputStream != null) {
+                dataInputStream.close();
+            }
         } catch (IOException e) {
-            System.out.println("Client message: IOException: " + e);
+            System.out.println("Client: IOException: " + e);
         }
         // sockets and streams are closed automatically due to try-with-resources
         // so no finally block required here.
@@ -87,4 +148,3 @@ public class Client {
     }
 }
 
-//  LocalTime time = LocalTime.parse(timeString); // Parse String -> convert to LocalTime object if required LocalTime.parse(timeString); // Parse timeString -> convert to LocalTime object if required

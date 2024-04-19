@@ -3,10 +3,7 @@ package org.example.Current.BusinessObjects;
 import org.example.Current.DAOs.MySqlCarDao;
 import org.example.Current.DTOs.Car;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.sql.SQLException;
@@ -31,10 +28,10 @@ public class Server {
             int clientNumber = 0;  // a number sequentially allocated to each new client (for identification purposes here)
 
             while (true) {
-                System.out.println("Server: Listening/waiting for connections on port ..." + SERVER_PORT_NUMBER);
+                // System.out.println("Server: Listening/waiting for connections on port ..." + SERVER_PORT_NUMBER);
+                System.out.println("Server: Listening for connections on port ..." + SERVER_PORT_NUMBER);
                 clientSocket = serverSocket.accept();
                 clientNumber++;
-                System.out.println("Server: Listening for connections on port ..." + SERVER_PORT_NUMBER);
 
                 System.out.println("Server: Client " + clientNumber + " has connected.");
                 System.out.println("Server: Port number of remote client: " + clientSocket.getPort());
@@ -103,12 +100,15 @@ class ClientHandler implements Runnable   // each ClientHandler communicates wit
     public void run() {
         String request;
         ClientServerCommands commands = new ClientServerCommands();
+        DataOutputStream dataOutputStream = null;
         try {
             while ((request = socketReader.readLine()) != null) {
                 System.out.println("Server: (ClientHandler): Read command from client " + clientNumber + ": " + request);
 
-                // Implement our PROTOCOL
-                // The protocol is the logic that determines the responses given based on requests received.
+                // Implement PROTOCOL
+                /**
+                 * Main Author: Logan Rushe
+                 */
                 if (request.startsWith(commands.DisplayCarById))  // so, client wants a Car!
                 {
                     String[] requestCommands = request.split(" "); // Split request into parts
@@ -117,17 +117,70 @@ class ClientHandler implements Runnable   // each ClientHandler communicates wit
                     if(car != null) {
                         String carJson = jsonHandler.carObjectToJson(car); // Convert to JSON
                         socketWriter.println(carJson);  // send the car to client (as a JSON string)
-                        System.out.println("Server: JSON of Car sent to client.");
+                        System.out.printf("Server: JSON of Car sent to client %d\n", clientNumber);
                     } else {
                         socketWriter.println("ERROR: No car found with requested id");
-                        System.out.println("Server: Failed to find the requested id");
+                        System.out.printf("Server: Failed to find the requested id from client %d\n", clientNumber);
                     }
-                } else if (request.startsWith("quit")) {
+                }
+                /**
+                 * Main Author: Logan Rushe
+                 */
+                else if (request.startsWith(commands.GetImagesList)) {
+                    String imagesListJson = jsonHandler.stringListToJson(commands.imagesList);
+                    socketWriter.println(imagesListJson);
+                    System.out.printf("Server: JSON of images List sent to client %d\n", clientNumber);
+                }
+                /**
+                 * Main Author: Logan Rushe
+                 */
+                else if (request.startsWith(commands.GetImage)) {
+                    try {
+                        dataOutputStream = new DataOutputStream(clientSocket.getOutputStream());
+                        System.out.printf("Preparing to send file to Client %d...\n", clientNumber);
+
+                        String[] requestCommands = request.split(" "); // Split request into parts
+                        String imageName = "Images/" + requestCommands[2];  // Define image path
+
+                        int bytes = 0;
+                        // Open the File at the specified location (path)
+                        File file = new File(imageName);
+                        FileInputStream fileInputStream = new FileInputStream(file);
+
+                        System.out.printf("Sending the file to Client %d...\n", clientNumber);
+                        socketWriter.println("Sending...");
+
+                        // send the length (in bytes) of the file to the server
+                        dataOutputStream.writeLong(file.length());
+
+                        // Break file into chunks
+                        byte[] buffer = new byte[4 * 1024]; // 4 kilobyte buffer
+
+                        // read bytes from file into the buffer until buffer is full, or we reached end of file
+                        while ((bytes = fileInputStream.read(buffer)) != -1) {
+                            // Send the buffer contents to Client Socket, along with the count of the number of bytes
+                            dataOutputStream.write(buffer, 0, bytes);
+                            dataOutputStream.flush();   // force the data into the stream
+                        }
+
+                        System.out.printf("File %s sent to Client %d\n", requestCommands[2], clientNumber);
+
+                        // close the file
+                        fileInputStream.close();
+                    } catch (IOException ex) {
+                        ex.printStackTrace();
+                        socketWriter.println("ERROR: File not found");
+                    }
+                }
+                /**
+                 * Main Author: Logan Rushe
+                 */
+                else if (request.startsWith("Exit")) {
                     socketWriter.println("Goodbye!");
-                    System.out.printf("Server: Client %d is quitting.", clientNumber);
+                    System.out.printf("Server: Client %d is quitting.\n", clientNumber);
                 } else {
                     socketWriter.println("ERROR: Unknown Request. Please try again.");
-                    System.out.println("Server message: Invalid request from client.");
+                    System.out.printf("Server message: Invalid request from client %d.\n", clientNumber);
                 }
             }
         } catch (IOException | SQLException ex) {
@@ -137,6 +190,7 @@ class ClientHandler implements Runnable   // each ClientHandler communicates wit
             try {
                 this.socketReader.close();
                 this.clientSocket.close();
+                if(dataOutputStream != null) { dataOutputStream.close(); }
             } catch (IOException ex) {
                 ex.printStackTrace();
             }
