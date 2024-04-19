@@ -39,7 +39,8 @@ public class Client {
             //ask user to enter a command
             Scanner consoleInput = new Scanner(System.in);
             ClientServerCommands commands = new ClientServerCommands();
-            System.out.printf("Valid commands are: \"%s <integer>\", \"%s\", \"%s [fileName]\", \"Exit\"\n", commands.DisplayCarById, commands.GetImagesList, commands.GetImage);
+            System.out.printf("Valid commands are: \"%s <integer>\", \"%s\", \"%s <integer>\", \"%s\", \"%s [fileName]\", \"Exit\"\n",
+                    commands.DisplayCarById, commands.DisplayAllCars, commands.DeleteCarById, commands.GetImagesList, commands.GetImage);
             System.out.println("Please enter a command: ");
             String userRequest = consoleInput.nextLine();
             JsonConverter jsonConverter = new JsonConverter();
@@ -65,6 +66,28 @@ public class Client {
                     } else { // Car was not found
                         System.out.println("Client: Response from server after \"display car by id\" request: " + response);
                     }
+                }
+                /**
+                 * Main Author: Ida Tehlarova
+                 * <p>
+                 * Other contributors: Logan Rushe
+                 */
+                else if (userRequest.startsWith(commands.DisplayAllCars)) {
+                    String jsonString = in.readLine();  // wait for response from server
+                    List<Car> list = jsonConverter.JsonToCarList(jsonString); // Convert JSON String to car Object
+
+                    System.out.println("Displaying all cars!");
+                    System.out.printf("%-5s %-12s %-20s %-10s %s %9s \n", "Id", "Model", "Brand", "Colour", "Production Year", "Price");
+                    for (Car car : list) {
+                        displayCar(car);
+                    }
+                }
+                /**
+                 * Main Author: Ida Tehlarova
+                 */
+                else if(userRequest.startsWith(commands.DeleteCarById)){
+                    String response = in.readLine();
+                    System.out.println(response);
                 }
                 /**
                  * Main Author: Logan Rushe
@@ -128,10 +151,12 @@ public class Client {
                 }
                 else {
                     System.out.println("Command unknown. Try again.");
+                    System.out.println("Server: " + in.readLine());
                 }
 
                 consoleInput = new Scanner(System.in);
-                System.out.printf("\nValid commands are: \"%s <integer>\", \"%s\", \"%s [fileName]\", \"Exit\"\n", commands.DisplayCarById, commands.GetImagesList, commands.GetImage);
+                System.out.printf("\nValid commands are: \"%s <integer>\", \"%s\", \"%s <integer>\", \"%s\", \"%s [fileName]\", \"Exit\"\n",
+                        commands.DisplayCarById, commands.DisplayAllCars, commands.DeleteCarById, commands.GetImagesList, commands.GetImage);
                 System.out.println("Please enter a command: ");
                 userRequest = consoleInput.nextLine();
             }

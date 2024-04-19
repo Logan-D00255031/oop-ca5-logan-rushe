@@ -7,6 +7,7 @@ import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.sql.SQLException;
+import java.util.List;
 
 public class Server {
 
@@ -124,6 +125,25 @@ class ClientHandler implements Runnable   // each ClientHandler communicates wit
                     }
                 }
                 /**
+                 * Main Author: Ida Tehlarova
+                 */
+                else if(request.startsWith(commands.DisplayAllCars)){
+                    List<Car> list = ICarDao.findAllCars();
+                    String jsonCarList = jsonHandler.carListToJson(list);
+                    System.out.println("Server about to send this Json string"+jsonCarList);
+                    socketWriter.println(jsonCarList);
+                }
+                /**
+                 * Main Author: Ida Tehlarova
+                 */
+                else if(request.startsWith(commands.DeleteCarById)){
+                    String[] requestCommands = request.split(" ");
+                    int id = Integer.parseInt(requestCommands[4]);
+                    ICarDao.deleteCarById(id);
+                    socketWriter.println("Deleted car with id "+id);
+                    System.out.println("Server: Car deleted.");
+                }
+                /**
                  * Main Author: Logan Rushe
                  */
                 else if (request.startsWith(commands.GetImagesList)) {
@@ -180,7 +200,7 @@ class ClientHandler implements Runnable   // each ClientHandler communicates wit
                     System.out.printf("Server: Client %d is quitting.\n", clientNumber);
                 } else {
                     socketWriter.println("ERROR: Unknown Request. Please try again.");
-                    System.out.printf("Server message: Invalid request from client %d.\n", clientNumber);
+                    System.out.printf("Server: Invalid request from client %d.\n", clientNumber);
                 }
             }
         } catch (IOException | SQLException ex) {

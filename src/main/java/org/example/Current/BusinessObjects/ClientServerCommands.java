@@ -12,6 +12,7 @@ public class ClientServerCommands {
     public String DisplayCarById = "display car by id";
     public String DisplayAllCars = "display all cars";
     public String AddACar = "add a car";
+    public String DeleteCarById = "delete car by id";
     public String GetImagesList = "get images list";
     public List<String> imagesList = new ArrayList<>();
     public String GetImage = "get image";
