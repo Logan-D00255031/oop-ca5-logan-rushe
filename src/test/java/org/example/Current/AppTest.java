@@ -30,7 +30,7 @@ public class AppTest {
     /**
      * Main Author: Logan Rushe
      * <p>
-     * Table must already contain at least 15 items in order to pass
+     * Table must already contain at least 16 items in order to pass
      */
     @Test
     public void insertTest2() throws SQLException {
