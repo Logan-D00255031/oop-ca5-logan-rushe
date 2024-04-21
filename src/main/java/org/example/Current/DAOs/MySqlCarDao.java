@@ -122,10 +122,6 @@ public class MySqlCarDao extends MySqlDao implements CarDaoInterface {
                     newCar = new Car(insertedId, car.getModel(), car.getBrand(), car.getColour(), car.getProductionYear(), car.getPrice()); // Create a new Car with auto incremented id, needed for return so we see what was added
                 }
             }
-            /* TODO
-                Try to return the car that was found from the database check and figure out how to tell it apart from the car being added successfully
-                Most likely will have to send the Car info through the function and still return NULL
-             */
         } catch (SQLException e) {
             throw new SQLException("insertCar() " + e.getMessage());
         } finally {
@@ -268,7 +264,6 @@ public class MySqlCarDao extends MySqlDao implements CarDaoInterface {
     public List<Car> findCarsUsingFilter(Comparator<Car> carComparator) throws SQLException {
         Connection connection = null;
         PreparedStatement preparedStatement1 = null;
-        ResultSet resultSet = null;
         List<Car> carsList = new ArrayList<>();
 
         try {

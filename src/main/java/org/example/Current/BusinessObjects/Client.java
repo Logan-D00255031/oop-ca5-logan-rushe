@@ -92,7 +92,11 @@ public class Client {
                     System.out.println("Client: Receiving response from server...");
     //                get response from the server with entity or error message
                     String newCar = in.readLine();
-                    System.out.println("Client: New entity was added into database. New entity: " + "\n" + newCar);
+                    if(newCar.contains("}")) {
+                        System.out.println("Client: New entity was added into database. New entity: " + "\n" + newCar);
+                    } else {
+                        System.out.println("Server: " + newCar);
+                    }
                 }
                 /**
                  * Main Author: Ida Tehlarova

@@ -156,6 +156,7 @@ class ClientHandler implements Runnable   // each ClientHandler communicates wit
 //                            otherwise print message when failed to add, meaning entity already exists or was not able to insert
                     } else {
                         System.out.println("Server message: Entity failed to add.");
+                        socketWriter.println("Car failed to add. It may already exist in the table");
                     }
                 }
                 /**
