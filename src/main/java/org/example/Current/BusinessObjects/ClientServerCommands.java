@@ -18,6 +18,7 @@ public class ClientServerCommands {
     public String GetImage = "get image";
     public ClientServerCommands() {
         imagesList.add("parrot_image.jpg");
-        imagesList.add("img2.jpg");
+        imagesList.add("Cool_Background.jpg");
+        imagesList.add("Metroid_Dread.jpg");
     }
 }
